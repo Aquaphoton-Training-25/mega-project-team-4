@@ -1,61 +1,53 @@
 import cv2
-import numpy as np
-
+import os
 from tkinter import Tk, filedialog
 
 def get_video_path():
     root = Tk()
-    root.withdraw() 
+    root.withdraw()
     return filedialog.askopenfilename(title="Select Video", filetypes=[("MP4 files", "*.mp4")])
 
+left_path = get_video_path()
+right_path = get_video_path()
 
-left_video_path = get_video_path()
-right_video_path = get_video_path()
+capL = cv2.VideoCapture(left_path)
+capR = cv2.VideoCapture(right_path)
 
-left=cv2.VideoCapture(left_video_path)
+desired_width = 1200
+desired_height = 920
 
-right=cv2.VideoCapture(right_video_path)
+stitcher = cv2.Stitcher_create()
 
-frame_width=int(left.get(cv2.CAP_PROP_FRAME_WIDTH))
-frame_height=int(left.get(cv2.CAP_PROP_FRAME_HEIGHT))
+frame_interval = 2
+frame_rate = 15
+frame_count = 0
+output = []
 
-frame_rate=int(left.get(cv2.CAP_PROP_FPS))
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+out = cv2.VideoWriter('output.mp4', fourcc, frame_rate, (desired_width, desired_height))
 
-
-fourcc=cv2.VideoWriter_fourcc(*'mp4v')
-out=cv2.VideoWriter('output.mp4',fourcc,frame_rate,(frame_width*2,frame_height))
 
 while True:
-    ret1,frame1=left.read()
+    retL, imageL = capL.read()
+    retR, imageR = capR.read()
 
-    ret2,frame2=right.read()
-
-    if not ret1 and not ret2:
+    if not retL or not retR:
         break
+     
+    if frame_count % frame_interval == 0:
+        status, stitched_image = stitcher.stitch([imageL, imageR])
+        if status == cv2.Stitcher_OK and stitched_image is not None:
 
-    frame2=cv2.resize(frame2,(frame_width,frame_height))
+            resized_stitched_image = cv2.resize(stitched_image, (desired_width, desired_height))
+            output.append(resized_stitched_image)
+            out.write(resized_stitched_image)
+           
+           
 
-    canvas=np.zeros((frame_height,frame_width*2,3),dtype=np.uint8)
+    frame_count += 1
 
-    canvas[:,:frame_width]=frame1
-
-    canvas[:,frame_width:]=frame2
-
-    out.write(canvas)
-
-left.release()
-right.release()
-out.release()    
-
-
-
-
-
-
-
-
-
-
-
-
+capL.release()
+capR.release()
+out.release()
+cv2.destroyAllWindows()
 
