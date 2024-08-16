@@ -17,8 +17,8 @@
 #define green 17
 #define current_sensor 23
 #define volt 24
-#define R1=30000
-#define R2=7500
+#define R1 30000
+#define R2 7500
 int md1=0;
 int md2=0;
 float c1=0;
@@ -35,7 +35,7 @@ if (Serial.available() > 0) {
        md1= command.substring(3).toInt(); // Extract speed value
         analogWrite(ENA, md1 ); 
         md2 = command.substring(3).toInt(); // Extract speed value
-      analogWrite(ENB, md2)
+      analogWrite(ENB, md2);
 
     // Parse and execute the command
     if (command.startsWith("1")) { // Motor A control
@@ -73,12 +73,12 @@ if (Serial.available() > 0) {
          }  
  void rgb(){
    
-   if((md1&&md1) => 170)
+   if((md1&&md1) >= 170)
    {  analogWrite(red,255);
 
             }
-   else if ((md1&&md1)=>85 && (md1&&md1)<170 )
-        {   analogWrite(blue,255);
+else if ( (md1 && md1) >= 85 && (md1 && md1) < 170 )
+{   analogWrite(blue,255);
                }
         else {
                analogWrite(green,255);
@@ -87,7 +87,7 @@ if (Serial.available() > 0) {
  void current () {
     c1=analogRead(current_sensor);
     c2= (c1/1023.0)*5.0;
-    c3= (((c2-2.5.0)*1000)/185.0);
+    c3= (((c2-2.50)*1000)/185.0);
  }
  void  voltage () {
   analogvalue= analogRead(volt);
@@ -118,6 +118,6 @@ pinMode(IN1, OUTPUT);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  
 
 }
