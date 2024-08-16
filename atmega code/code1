@@ -54,47 +54,55 @@ void motors() {
         digitalWrite(IN2, LOW);
         digitalWrite(IN3, HIGH);
         digitalWrite(IN4, LOW);
+        delay(50);
     } 
     else if (command.startsWith("2")) { // Backward
         digitalWrite(IN1, LOW);
         digitalWrite(IN2, HIGH);
         digitalWrite(IN3, LOW);
-        digitalWrite(IN4, HIGH);
+        digitalWrite(IN4, HIGH) ;
+        delay(50);
     } 
     else if (command.startsWith("3")) { // Left
         digitalWrite(IN1, LOW);
         digitalWrite(IN2, HIGH);
         digitalWrite(IN3, HIGH);
         digitalWrite(IN4, LOW);
+         delay(50);
     } 
     else if (command.startsWith("4")) { // Right
         digitalWrite(IN3, LOW);
         digitalWrite(IN4, HIGH);
         digitalWrite(IN1, HIGH);
         digitalWrite(IN2, LOW);
+         delay(50);
     } 
     else if (command == "0") { // Stop both motors
         analogWrite(ENA, 0);
         analogWrite(ENB, 0);
+         delay(50);
     }
   }
 }
 
 void rgb() {
   if ((md1&&md2) >= 170) {  // High speed
-      analogWrite(red, 255);
+      analogWrite(red ,255);
       analogWrite(blue, 0);
       analogWrite(green, 0);
+      delay(50);
   } 
   else if ((md1 && md2) >= 85 && (md1 && md2) < 170) { // Medium speed
       analogWrite(red, 0);
       analogWrite(blue, 255);
       analogWrite(green, 0);
+       delay(50);
   } 
   else {  // Low speed
       analogWrite(red, 0);
       analogWrite(blue, 0);
       analogWrite(green, 255);
+       delay(50);
   }
 }
 
