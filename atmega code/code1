@@ -1,7 +1,7 @@
 // 1== forward
 // 2== backward
-// 3== right
-// 4== left
+// 3== left
+// 4== right
 // 0== stop
 
 // Define pins for Motor A
@@ -30,6 +30,7 @@
 // Define global variables
 int md1 = 0;
 int md2 = 0;
+int velocity =0;
 float c1 = 0;
 float c2 = 0;
 float c3 = 0;
@@ -41,9 +42,9 @@ void motors() {
   if (Serial.available() > 0) {
     String command = Serial.readStringUntil('\n'); // Read the incoming data until a newline
     
-    md1 = command.substring(1).toInt(); // Extract speed value
-    md2 = command.substring(1).toInt(); // Extract speed value
-    
+   velocity = command.substring(1).toInt(); // Extract speed value
+    md1=velocity;
+    md2=velocity;
     analogWrite(ENA, md1); 
     analogWrite(ENB, md2);
 
@@ -80,12 +81,12 @@ void motors() {
 }
 
 void rgb() {
-  if ((md1&&md1) >= 170) {  // High speed
+  if ((md1&&md2) >= 170) {  // High speed
       analogWrite(red, 255);
       analogWrite(blue, 0);
       analogWrite(green, 0);
   } 
-  else if ((md1 && md1) >= 85 && (md1 && md1) < 170) { // Medium speed
+  else if ((md1 && md2) >= 85 && (md1 && md2) < 170) { // Medium speed
       analogWrite(red, 0);
       analogWrite(blue, 255);
       analogWrite(green, 0);
