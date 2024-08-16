@@ -80,12 +80,12 @@ void motors() {
 }
 
 void rgb() {
-  if (md1 >= 170) {  // High speed
+  if ((md1&&md1) >= 170) {  // High speed
       analogWrite(red, 255);
       analogWrite(blue, 0);
       analogWrite(green, 0);
   } 
-  else if (md1 >= 85) { // Medium speed
+  else if ((md1 && md1) >= 85 && (md1 && md1) < 170) { // Medium speed
       analogWrite(red, 0);
       analogWrite(blue, 255);
       analogWrite(green, 0);
