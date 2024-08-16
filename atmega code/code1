@@ -1,0 +1,123 @@
+// 1== forward
+// 2== backward
+// 3== right
+// 4== left
+// 0== stop
+// Define pins for Motor A
+#define IN1 4  
+#define IN2 5
+#define ENA 15 // PD6 (OC0A - PWM)
+
+// Define pins for Motor B
+#define IN3 6 // PD4
+#define IN4 11 // PD5
+#define ENB 15 // PD7 (OC0B - PWM)
+#define red  15
+#define blue 16 
+#define green 17
+#define current_sensor 23
+#define volt 24
+#define R1=30000
+#define R2=7500
+int md1=0;
+int md2=0;
+float c1=0;
+float c2=0;
+float c3=0;
+float Vin=0;
+float Vout=0;
+float analogvalue=0;
+void motors () {
+
+if (Serial.available() > 0) {
+    String command = Serial.readStringUntil('\n'); // Read the incoming data until a newline
+    
+       md1= command.substring(3).toInt(); // Extract speed value
+        analogWrite(ENA, md1 ); 
+        md2 = command.substring(3).toInt(); // Extract speed value
+      analogWrite(ENB, md2)
+
+    // Parse and execute the command
+    if (command.startsWith("1")) { // Motor A control
+        digitalWrite(IN1, HIGH);
+        digitalWrite(IN2, LOW);
+        digitalWrite(IN3, HIGH);
+        digitalWrite(IN4, LOW);
+    }
+      else if (command.startsWith("2")) { // Backward
+        digitalWrite(IN1, LOW);
+        digitalWrite(IN2, HIGH);
+        digitalWrite(IN3, LOW);
+        digitalWrite(IN4, HIGH);
+      }
+    
+
+    if (command.startsWith("3")){ // left
+        digitalWrite(IN1, LOW);
+        digitalWrite(IN2, HIGH);
+        digitalWrite(IN3, HIGH);
+        digitalWrite(IN4, LOW);
+      }
+      else if (command.startsWith("4")) { // right
+        digitalWrite(IN3, LOW);
+        digitalWrite(IN4, HIGH);
+        digitalWrite(IN1, HIGH);
+        digitalWrite(IN2, LOW);
+      }
+
+    if (command == "0") { // Stop both motors
+      analogWrite(ENA, 0);
+      analogWrite(ENB, 0);
+      }
+       }
+         }  
+ void rgb(){
+   
+   if((md1&&md1) => 170)
+   {  analogWrite(red,255);
+
+            }
+   else if ((md1&&md1)=>85 && (md1&&md1)<170 )
+        {   analogWrite(blue,255);
+               }
+        else {
+               analogWrite(green,255);
+               }  
+                       }
+ void current () {
+    c1=analogRead(current_sensor);
+    c2= (c1/1023.0)*5.0;
+    c3= (((c2-2.5.0)*1000)/185.0);
+ }
+ void  voltage () {
+  analogvalue= analogRead(volt);
+  Vout = (analogvalue * 5.0 / 1023.0);
+  Vin = Vout * (R2/(R1+R2));
+
+
+  
+ }
+
+
+
+
+
+void setup() {
+pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(red, OUTPUT);
+  pinMode(blue, OUTPUT);
+  pinMode(green, OUTPUT);
+  pinMode(current_sensor, INPUT);
+  pinMode(volt, INPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+}
