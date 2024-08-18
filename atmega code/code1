@@ -5,23 +5,25 @@
 // 0== stop
 
 // Define pins for Motor A
-#define IN1 4  
-#define IN2 5
-#define ENA 15 // PD6 (OC0A - PWM)
+#include <SoftwareSerial.h>
+SoftwareSerial HC06(0,1);
+#define IN1 2  //pd2
+#define IN2 3  //pd3
+#define ENA A0 // PD6 (OC0A - PWM)
 
 // Define pins for Motor B
-#define IN3 6 // PD4
-#define IN4 11 // PD5
-#define ENB 7 // PD7 (OC0B - PWM) - Fix: ENB was incorrectly assigned the same pin as ENA
+#define IN3 4 // PD4
+#define IN4 5 // PD5
+#define ENB A1 // PD7 (OC0B - PWM) - Fix: ENB was incorrectly assigned the same pin as ENA
 
 // Define pins for RGB LED
-#define red  16
-#define blue 17
-#define green 18
+#define red  6 //pd6
+#define blue 7 //pd7
+#define green 8 //pb0
 
 // Define pins for sensors
-#define current_sensor 23
-#define volt 24
+#define current_sensor 11
+#define volt 10
 
 // Define resistor values for voltage measurement
 #define R1 30000
@@ -86,13 +88,13 @@ void motors() {
 }
 
 void rgb() {
-  if ((md1&&md2) >= 170) {  // High speed
+  if (md1 >= 170) {  // High speed
       analogWrite(red ,255);
       analogWrite(blue, 0);
       analogWrite(green, 0);
       delay(50);
   } 
-  else if ((md1 && md2) >= 85 && (md1 && md2) < 170) { // Medium speed
+  else if (md1 >= 85 && md1 < 170) { // Medium speed
       analogWrite(red, 0);
       analogWrite(blue, 255);
       analogWrite(green, 0);
@@ -110,12 +112,19 @@ void current() {
   c1 = analogRead(current_sensor);
   c2 = (c1 / 1023.0) * 5.0;
   c3 = (((c2 - 2.50) * 1000) / 185.0); // Convert to current in Amperes
+  HC06.print("Current: ");
+  HC06.print(c3);
+  HC06.println(" A");
+  
 }
 
 void voltage() {
   analogvalue = analogRead(volt);
   Vout = (analogvalue * 5.0 / 1023.0);
   Vin = Vout * (R2 / (R1 + R2)); // Calculate input voltage
+  HC06.print("Voltage: ");
+  HC06.print(Vin);
+  HC06.println(" V");
 }
 
 void setup() {
@@ -134,6 +143,7 @@ void setup() {
   
   // Initialize serial communication
   Serial.begin(9600);
+HC06.begin(9600);
 }
 
 void loop() {
