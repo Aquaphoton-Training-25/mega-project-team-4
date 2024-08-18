@@ -9,12 +9,12 @@
 SoftwareSerial HC06(0,1);
 #define IN1 2  //pd2
 #define IN2 3  //pd3
-#define ENA A0 // PD6 (OC0A - PWM)
+#define ENA 9 // pb1
 
 // Define pins for Motor B
 #define IN3 4 // PD4
 #define IN4 5 // PD5
-#define ENB A1 // PD7 (OC0B - PWM) - Fix: ENB was incorrectly assigned the same pin as ENA
+#define ENB 10 // pb2
 
 // Define pins for RGB LED
 #define red  6 //pd6
@@ -22,8 +22,8 @@ SoftwareSerial HC06(0,1);
 #define green 8 //pb0
 
 // Define pins for sensors
-#define current_sensor 11
-#define volt 10
+#define current_sensor A0  //pc0
+#define volt A1 //pc1
 
 // Define resistor values for voltage measurement
 #define R1 30000
