@@ -88,13 +88,6 @@ void autonomous(){
          analogWrite(ENA, 0);
         analogWrite(ENB, 0);
         }
-        else {
-      
-      digitalWrite(IN1, HIGH);
-      digitalWrite(IN2, LOW);
-      digitalWrite(IN3, HIGH);
-      digitalWrite(IN4, LOW);      
-             }
                 }
                    }
 void motors() {
@@ -146,22 +139,22 @@ void motors() {
 
 void rgb() {
   if (md1 >= 170) {  // High speed
-      analogWrite(red ,255);
-      analogWrite(blue, 0);
-      analogWrite(green, 0);
-      delay(50);
+      digitalWrite(red ,HIGH);
+      digitalWrite(blue, LOW);
+      digitalWrite(green, LOW);
+      
   } 
   else if (md1 >= 85 && md1 < 170) { // Medium speed
-      analogWrite(red, 0);
-      analogWrite(blue, 255);
-      analogWrite(green, 0);
-       delay(50);
+      digitalWrite(red, LOW);
+      digitalWrite(blue, HIGH);
+      digitalWrite(green, LOW);
+       
   } 
   else {  // Low speed
-      analogWrite(red, 0);
-      analogWrite(blue, 0);
-      analogWrite(green, 255);
-       delay(50);
+      digitalWrite(red, LOW);
+      digitalWrite(blue, LOW);
+      digitalWrite(green, HIGH);
+      
   }
 }
 
