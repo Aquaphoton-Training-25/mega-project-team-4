@@ -7,19 +7,19 @@
 // Define pins for Motor A
 #include <SoftwareSerial.h>
 SoftwareSerial HC06(0,1);
-#define IN1 2  //pd2
-#define IN2 3  //pd3
+#define IN1 4  //pd2
+#define IN2 5 //pd3
 #define ENA 9 // pb1
 
 // Define pins for Motor B
-#define IN3 4 // PD4
-#define IN4 5 // PD5
+#define IN3 6 // PD4
+#define IN4 7 // PD5
 #define ENB 10 // pb2
 
 // Define pins for RGB LED
-#define red  6 //pd6
-#define blue 7 //pd7
-#define green 8 //pb0
+#define red  11 //pd6
+#define blue 12 //pd7
+#define green 13 //pb0
 
 // Define pins for sensors
 #define current_sensor A0  //pc0
@@ -28,7 +28,9 @@ SoftwareSerial HC06(0,1);
 // Define resistor values for voltage measurement
 #define R1 30000
 #define R2 7500
-
+// Define echo and trig pins for ultrasonic
+#define trig 16
+#define echo 17
 // Define global variables
 int md1 = 0;
 int md2 = 0;
@@ -39,7 +41,62 @@ float c3 = 0;
 float Vin = 0;
 float Vout = 0;
 float analogvalue = 0;
+float distance1 =0;
+int distance2 =0;
+float time1 =0;
+bool Manual_mode = true;
+void Mode() {
+  if (Serial.available() > 0) {
+    String command = Serial.readStringUntil('\n'); // Read the incoming data until a newline
+    
+    if (command == "M") { 
+      Manual_mode = true; // Switch to manual mode
+    } 
+    else if (command == "A") { 
+      Manual_mode = false; // Switch to autonomous mode
+    }
+  }
+}
 
+void distance (){
+    
+  digitalWrite(trig, LOW);  
+  delayMicroseconds(2);  
+  digitalWrite(trig, HIGH);  
+  delayMicroseconds(10);  
+  digitalWrite(trig, LOW);
+    time1 = pulseIn(echo, HIGH);  
+    distance1 = (time1*0.0343 )/2;
+  HC06.print("Distance= ");  
+  HC06.print(distance1);
+  HC06.println(" cm");  
+  
+}
+void autonomous(){
+  if (Serial.available() > 0) {
+    String automatic = Serial.readStringUntil('\n'); // Read the incoming data until a newline
+
+    distance2=automatic.substring(1).toInt();
+    float dis= distance1-distance2; 
+    if (dis > 10){
+      digitalWrite(IN1, HIGH);
+        digitalWrite(IN2, LOW);
+        digitalWrite(IN3, HIGH);
+        digitalWrite(IN4, LOW);
+              }
+      else if(dis <= 10){
+         analogWrite(ENA, 0);
+        analogWrite(ENB, 0);
+        }
+        else {
+      
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);      
+             }
+                }
+                   }
 void motors() {
   if (Serial.available() > 0) {
     String command = Serial.readStringUntil('\n'); // Read the incoming data until a newline
@@ -138,6 +195,8 @@ void setup() {
   pinMode(red, OUTPUT);
   pinMode(blue, OUTPUT);
   pinMode(green, OUTPUT);
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
   pinMode(current_sensor, INPUT);
   pinMode(volt, INPUT);
   
@@ -147,7 +206,12 @@ HC06.begin(9600);
 }
 
 void loop() {
-  motors();  // Control motors based on serial commands
+  Mode();  // Check and update mode based on commands
+  if (Manual_mode) { 
+    motors();  // Manual mode: Control motors based on serial commands
+  } else {
+    autonomous();  // Autonomous mode: Maintain distance from the wall
+  }
   rgb();     // Update RGB LED based on motor speed
   current(); // Measure current
   voltage(); // Measure voltage
