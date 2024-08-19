@@ -54,13 +54,24 @@ def draw_matches(img1, img2, matches):
     return img_matches
 
 def rectify_images(imgL, imgR):
-    numDisparities = 16
-    blockSize = 15
-    
-    stereo = cv2.StereoBM_create(numDisparities=numDisparities, blockSize=blockSize)
+    stereo = cv2.StereoSGBM_create(
+        minDisparity=0,
+        numDisparities=16,
+        blockSize=5,
+        P1=8 * 3 * 5**2,
+        P2=32 * 3 * 5**2,
+        disp12MaxDiff=1,
+        preFilterCap=4,
+        uniquenessRatio=10,
+        speckleWindowSize=100,
+        speckleRange=32,
+        mode=cv2.STEREO_SGBM_MODE_SGBM_3WAY
+    )
     disparity = stereo.compute(imgL, imgR)
 
     return disparity
+
+
 
 def normalize_disparity(disparity):
     disparity = np.clip(disparity, 0, disparity.max())
@@ -188,4 +199,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
