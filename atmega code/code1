@@ -1,177 +1,184 @@
-// 1== forward
-// 2== backward
-// 3== left
-// 4== right
-// 0== stop
+#include <SoftwareSerial.h>
+
+SoftwareSerial HC06(2, 3);  // RX, TX for HC-06
 
 // Define pins for Motor A
-#include <SoftwareSerial.h>
-SoftwareSerial HC06(0,1);
-#define IN1 4  //pd2
-#define IN2 5 //pd3
-#define ENA 9 // pb1
+#define IN1 4  // pd2
+#define IN2 5  // pd3
+#define ENA 9  // pb1
 
 // Define pins for Motor B
-#define IN3 6 // PD4
-#define IN4 7 // PD5
+#define IN3 6  // PD4
+#define IN4 7  // PD5
 #define ENB 10 // pb2
 
 // Define pins for RGB LED
-#define red  11 //pd6
-#define blue 12 //pd7
-#define green 13 //pb0
+#define red 11   // pd6
+#define blue 12  // pd7
+#define green 13 // pb0
 
 // Define pins for sensors
-#define current_sensor A0  //pc0
-#define volt A1 //pc1
+#define current_sensor A0  // pc0
+#define volt A1            // pc1
 
 // Define resistor values for voltage measurement
 #define R1 30000
 #define R2 7500
+
 // Define echo and trig pins for ultrasonic
 #define trig 16
 #define echo 17
+
 // Define global variables
 int md1 = 0;
 int md2 = 0;
-int velocity =0;
+int velocity = 0;
 float c1 = 0;
 float c2 = 0;
 float c3 = 0;
 float Vin = 0;
 float Vout = 0;
 float analogvalue = 0;
-float distance1 =0;
-int distance2 =0;
-float time1 =0;
+float distance1 = 0;
+int distance2 = 0;
+float time1 = 0;
 bool Manual_mode = true;
-void Mode() {
-  if (Serial.available() > 0) {
-    String command = Serial.readStringUntil('\n'); // Read the incoming data until a newline
+String mode, automatic, manual;
+
+
+    void Mode() {
+  if (HC06.available() > 0) {
+    mode = HC06.readStringUntil('\n');  // Read the incoming data until a newline
+
+    if (mode == "M") {
+      Manual_mode = true;  // Switch to manual mode
+    } else if (mode == "A") {
+      Manual_mode = false;  // Switch to autonomous mode
+    }
+
+    // Echo the received command to the Serial Monitor
+    Serial.print("Mode command received: ");
+    Serial.println(mode);
     
-    if (command == "M") { 
-      Manual_mode = true; // Switch to manual mode
-    } 
-    else if (command == "A") { 
-      Manual_mode = false; // Switch to autonomous mode
+  }
+}
+
+
+void distance() {
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+  time1 = pulseIn(echo, HIGH);
+  distance1 = (time1 * 0.0343) / 2;
+  HC06.print("Distance= ");
+  HC06.print(distance1);
+  HC06.println(" cm");
+}
+
+void autonomous() {
+  if (HC06.available() > 0) {
+    automatic = HC06.readStringUntil('\n');  // Read the incoming data until a newline
+    delay(10);  // Small delay to stabilize reading
+    Serial.print("Raw autonomous command received: ");
+    Serial.println(automatic);
+
+    distance2 = automatic.substring(1).toInt();
+    Serial.print("Received autonomous distance: ");
+    Serial.println(distance2);
+
+    float dis = distance1 - distance2;
+    if (dis > 10) {
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+    } else if (dis <= 10) {
+      analogWrite(ENA, 0);
+      analogWrite(ENB, 0);
     }
   }
 }
 
-void distance (){
-    
-  digitalWrite(trig, LOW);  
-  delayMicroseconds(2);  
-  digitalWrite(trig, HIGH);  
-  delayMicroseconds(10);  
-  digitalWrite(trig, LOW);
-    time1 = pulseIn(echo, HIGH);  
-    distance1 = (time1*0.0343 )/2;
-  HC06.print("Distance= ");  
-  HC06.print(distance1);
-  HC06.println(" cm");  
-  
-}
-void autonomous(){
-  if (Serial.available() > 0) {
-    String automatic = Serial.readStringUntil('\n'); // Read the incoming data until a newline
-
-    distance2=automatic.substring(1).toInt();
-    float dis= distance1-distance2; 
-    if (dis > 10){
-      digitalWrite(IN1, HIGH);
-        digitalWrite(IN2, LOW);
-        digitalWrite(IN3, HIGH);
-        digitalWrite(IN4, LOW);
-              }
-      else if(dis <= 10){
-         analogWrite(ENA, 0);
-        analogWrite(ENB, 0);
-        }
-                }
-                   }
 void motors() {
-  if (Serial.available() > 0) {
-    String command = Serial.readStringUntil('\n'); // Read the incoming data until a newline
-    
-   velocity = command.substring(1).toInt(); // Extract speed value
-    md1=velocity;
-    md2=velocity;
-    analogWrite(ENA, md1); 
+  if (HC06.available() > 0) {
+    manual = HC06.readStringUntil('\n');  // Read the incoming data until a newline
+    delay(10);  // Small delay to stabilize reading
+    Serial.print("Raw motor command received: ");
+    Serial.println(manual);
+
+    velocity = manual.substring(1).toInt();  // Extract speed value
+    md1 = velocity;
+    md2 = velocity;
+    analogWrite(ENA, md1);
     analogWrite(ENB, md2);
 
+    Serial.print("Motor command processed: ");
+    Serial.println(manual);
+
     // Parse and execute the command
-    if (command.startsWith("1")) { // Forward
-        digitalWrite(IN1, HIGH);
-        digitalWrite(IN2, LOW);
-        digitalWrite(IN3, HIGH);
-        digitalWrite(IN4, LOW);
-        delay(50);
-    } 
-    else if (command.startsWith("2")) { // Backward
-        digitalWrite(IN1, LOW);
-        digitalWrite(IN2, HIGH);
-        digitalWrite(IN3, LOW);
-        digitalWrite(IN4, HIGH) ;
-        delay(50);
-    } 
-    else if (command.startsWith("3")) { // Left
-        digitalWrite(IN1, LOW);
-        digitalWrite(IN2, HIGH);
-        digitalWrite(IN3, HIGH);
-        digitalWrite(IN4, LOW);
-         delay(50);
-    } 
-    else if (command.startsWith("4")) { // Right
-        digitalWrite(IN3, LOW);
-        digitalWrite(IN4, HIGH);
-        digitalWrite(IN1, HIGH);
-        digitalWrite(IN2, LOW);
-         delay(50);
-    } 
-    else if (command == "0") { // Stop both motors
-        analogWrite(ENA, 0);
-        analogWrite(ENB, 0);
-         delay(50);
+    if (manual.startsWith("1")) {  // Forward
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+      delay(50);
+    } else if (manual.startsWith("2")) {  // Backward
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+      delay(50);
+    } else if (manual.startsWith("3")) {  // Left
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+      delay(50);
+    } else if (manual.startsWith("4")) {  // Right
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      delay(50);
+    } else if (manual == "0") {  // Stop both motors
+      analogWrite(ENA, 0);
+      analogWrite(ENB, 0);
+      delay(50);
     }
   }
 }
 
 void rgb() {
   if (md1 >= 170) {  // High speed
-      digitalWrite(red ,HIGH);
-      digitalWrite(blue, LOW);
-      digitalWrite(green, LOW);
-      
-  } 
-  else if (md1 >= 85 && md1 < 170) { // Medium speed
-      digitalWrite(red, LOW);
-      digitalWrite(blue, HIGH);
-      digitalWrite(green, LOW);
-       
-  } 
-  else {  // Low speed
-      digitalWrite(red, LOW);
-      digitalWrite(blue, LOW);
-      digitalWrite(green, HIGH);
-      
+    digitalWrite(red, HIGH);
+    digitalWrite(blue, LOW);
+    digitalWrite(green, LOW);
+  } else if (md1 >= 85 && md1 < 170) {  // Medium speed
+    digitalWrite(red, LOW);
+    digitalWrite(blue, HIGH);
+    digitalWrite(green, LOW);
+  } else {  // Low speed
+    digitalWrite(red, LOW);
+    digitalWrite(blue, LOW);
+    digitalWrite(green, HIGH);
   }
 }
 
 void current() {
   c1 = analogRead(current_sensor);
   c2 = (c1 / 1023.0) * 5.0;
-  c3 = (((c2 - 2.50) * 1000) / 185.0); // Convert to current in Amperes
+  c3 = (((c2 - 2.50) * 1000) / 185.0);  // Convert to current in Amperes
   HC06.print("Current: ");
   HC06.print(c3);
   HC06.println(" A");
-  
 }
 
 void voltage() {
   analogvalue = analogRead(volt);
   Vout = (analogvalue * 5.0 / 1023.0);
-  Vin = Vout * (R2 / (R1 + R2)); // Calculate input voltage
+  Vin = Vout * (R2 / (R1 + R2));  // Calculate input voltage
   HC06.print("Voltage: ");
   HC06.print(Vin);
   HC06.println(" V");
@@ -192,15 +199,15 @@ void setup() {
   pinMode(echo, INPUT);
   pinMode(current_sensor, INPUT);
   pinMode(volt, INPUT);
-  
+
   // Initialize serial communication
   Serial.begin(9600);
-HC06.begin(9600);
+  HC06.begin(9600);
 }
 
 void loop() {
   Mode();  // Check and update mode based on commands
-  if (Manual_mode) { 
+  if (Manual_mode) {
     motors();  // Manual mode: Control motors based on serial commands
   } else {
     autonomous();  // Autonomous mode: Maintain distance from the wall
