@@ -1,6 +1,6 @@
 #include <SoftwareSerial.h>
 
-SoftwareSerial HC06(2, 3);  // RX, TX for HC-06
+SoftwareSerial HC06(0,1);  // RX, TX for HC-06
 
 // Define pins for Motor A
 #define IN1 4  // pd2
@@ -55,10 +55,6 @@ String mode, automatic, manual;
     } else if (mode == "A") {
       Manual_mode = false;  // Switch to autonomous mode
     }
-
-    // Echo the received command to the Serial Monitor
-    Serial.print("Mode command received: ");
-    Serial.println(mode);
     
   }
 }
@@ -81,13 +77,7 @@ void autonomous() {
   if (HC06.available() > 0) {
     automatic = HC06.readStringUntil('\n');  // Read the incoming data until a newline
     delay(10);  // Small delay to stabilize reading
-    Serial.print("Raw autonomous command received: ");
-    Serial.println(automatic);
-
     distance2 = automatic.substring(1).toInt();
-    Serial.print("Received autonomous distance: ");
-    Serial.println(distance2);
-
     float dis = distance1 - distance2;
     if (dis > 10) {
       digitalWrite(IN1, HIGH);
@@ -113,9 +103,6 @@ void motors() {
     md2 = velocity;
     analogWrite(ENA, md1);
     analogWrite(ENB, md2);
-
-    Serial.print("Motor command processed: ");
-    Serial.println(manual);
 
     // Parse and execute the command
     if (manual.startsWith("1")) {  // Forward
